@@ -103,16 +103,16 @@ public class ARDriver {
             }
             try {
                 String genreField =
-                        fields[2].replace("\"", "").trim();
+                        fields[4].replace("\"", "").trim();
 
                 String yearField =
-                        fields[1].replace("\"", "").trim();
+                        fields[3].replace("\"", "").trim();
 
                 String typeField =
-                        fields[5].replace("\"", "").trim();
+                        fields[9].replace("\"", "").trim();
 
                 String ratingField =
-                        fields[7].replace("\"", "").trim();
+                        fields[11].replace("\"", "").trim();
                 if (genreField.isEmpty() ||
                         yearField.isEmpty() ||
                         typeField.isEmpty() ||
@@ -153,6 +153,7 @@ public class ARDriver {
                                 stats
                         );
                     }
+                    break;
                 }
 
             } catch (Exception e) {
@@ -227,7 +228,8 @@ public class ARDriver {
             }
             double average = totalSum / totalCount;
             String result =
-                    totalCount + "," +
+                    "," +
+                            totalCount + "," +
                             String.format("%.2f", average) + "," +
                             String.format("%.1f", globalMin) + "," +
                             String.format("%.1f", globalMax);
