@@ -23,6 +23,6 @@ docker exec -it namenode cat /output/part-r-00000
 docker cp namenode:/output/part-r-00000 .
 
 @REM compose down and return
-cd compose-images
+cd ../compose-images
 docker compose down
 cd ..
