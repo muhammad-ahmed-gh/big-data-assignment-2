@@ -1,0 +1,101 @@
+a) Indexing Question
+Query:
+db.moviesColl.createIndex({name: 1})
+db.find({name: "Ice Airport Alaska"})
+
+Comment:
+First query indexes the documents by name and sorts them ascendingly.
+Then it finds all the documents with the name "Ice Airport Alaska".
+Indexing made searching faster (sorted data)
+
+------------------------------------------------------------------------------
+b) Logical Operations Question
+Query:
+db.moviesColl.find({type: "Movie", genre: {$in: ["Drama", "Documentary"]}})
+
+Comment: it finds all the records that follow these criteria: type is Movie,
+and genre falls in [Drama, Documentary]
+
+------------------------------------------------------------------------------
+c) Aggregation Question
+Query:
+db.moviesColl.aggregate([
+    {$group: {_id: "$type", count: {$sum: 1}}},
+    {$sort: {count: -1}}
+])
+
+Comment:
+This performs aggregation pipelines in stages. First, it groups all documents
+by type and create count feature (which is incremented by one on every
+instance). It is then sorted descendingly by count
+
+------------------------------------------------------------------------------
+d) Query Question
+Query:
+db.moviesColl.aggregate([
+    {$match: {
+        type: "Movie",
+        imdb_rating: {$exists: true, $nin: [""]},
+        released_at: {$exists: true, $nin: [""]},
+        streaming_on: {$regex: "Prime Video|Netflix", $options: "i"}
+    }},
+    {$project: {
+        name: 1,
+        genre: 1,
+        country: 1,
+        streaming_on: 1,
+        released_at: {
+            $toInt: {
+                $arrayElemAt: [
+                    {$split: ["$released_at", "-"]},
+                    0
+                ]
+            }
+        },
+        imdb_rating: {
+            $toDouble: {
+                $arrayElemAt: [
+                    {$split: ["$imdb_rating", "/"]},
+                    0
+                ]
+            }
+        }
+    }},
+    {$match: {released_at: {$gt: 2010}}},
+    {$sort: {imdb_rating: -1}},
+    {$limit: 5}
+])
+
+Comment:
+First, it selects the movies documents that have imdb rating and a release
+date and have been streamed on Prime Video or Netflix. Then it projects the
+result by selecting some field and casting some of them to numeric values.
+Then it filters the numeric release date and sorts the result based on imdb
+rating. Finally it selects the first 5 documents.
+
+------------------------------------------------------------------------------
+e) Bonus
+Write one additional MongoDB query using any advanced MongoDB feature
+not already used in Part One.
+Query:
+db.moviesColl.aggregate([{
+    $bucket: {
+        groupBy: {
+            $toDouble: {
+                $arrayElemAt: [
+                    {$split: ["$imdb_rating", "/"]},
+                    0
+                ]
+            }
+        },
+        boundaries: [0, 5, 7, 8, 10],
+        default: "Other",
+        output: {
+            count: { $sum: 1 }
+        }
+    }
+}])
+
+Comment:
+It divides the documents having imdb rating into intervals (buckets)
+within ranges. It then counts the documents falling into each bucket.
